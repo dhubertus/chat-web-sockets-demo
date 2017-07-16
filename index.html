@@ -20,18 +20,63 @@
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script >
+    <script>
+    let online = []
+    $(function () {
+       var socket = io();
+       $('form').submit(function(){
+         socket.emit('chat message', $('#m').val());
+         $('#messages').append($('<li>').text($('#m').val()));
+         $('#m').val('');
+         return false;
+       });
+       socket.on('chat message', function(msg){
+         $('#messages').append($('<li>').text(msg));
+       });
+       socket.on('status', function(msg){
+         $('#messages').append($('<li>').text(msg));
+       });
+       socket.on('typing', function(msg){
+         $('#messages').append($('<li>').text(msg));
+       });
+       socket.on('add/remove to online', function(msg){
+         if (online.includes(msg)) {
+           let cut = online.indexOf(msg)
+           online.splice(cut, 1)
+          //  console.log(online, 'incl');
+         } else {
+           console.log(msg, 'msg');
+           online.push(msg)
+           console.log(online, 'online');
+           online.forEach(user => {
+             $('#messages').append($('<li>').text(user + " is online"));
+            //  console.log(online, 'add');
+           })
+         }
+       })
+
+       socket.on('say to someone', function(online, msg) {
+         $('#messages').append($('<li>').text(msg));
+       })
+
+       socket.on('private message', function(msg) {
+         $('#messages').append($('<li>').text(msg));
+       })
+
+
+       $('#m').on('keypress', function() {
+         console.log('working');
+         if($('#m').val() !== '') {
+           console.log('working');
+          socket.emit('user typing')
+         }
+       })
+
+
+      });
+    </script>
+    <script>
       var socket = io();
-
-      $(function () {
-          var socket = io();
-          $('form').submit(function(){
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
-            return false;
-          });
-        });
-
     </script>
   </body>
 </html>
